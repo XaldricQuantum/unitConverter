@@ -2,7 +2,7 @@ function ConvertHandler() {
   
   // const regexNum = /^(\d*\.?\d+)?\s*(.*)/;
 
-  const regexUnit = /gal|l|mi|km|lbs|kg/;
+  const regexUnit = /(gal|lbs|mi|km|l|kg)$/;
   const numRegex = /\d/;
   const onlyNumRegex = /[^0-9/.]/g;
 
@@ -16,22 +16,51 @@ function ConvertHandler() {
       
     } else if (match[0]) {
       // if ()
-      result = match[0].includes("/") ? parseInt(match[0].split("/")[0])/parseInt(match[0].split("/")[1]) : parseFloat(match[0]);
+      try {
+        
+        if ((match[0].split("/").length) > 2) {
+          console.log("return error");
+          
+          // a = b;
+          throw new Error;
+  
+        }
+      } catch (e) {
+        // console.error( "error bad number");
+        console.log(e.message);
+        
+        throw e;
+      }
+      result = match[0].includes("/") ? parseFloat(match[0].split("/")[0])/parseFloat(match[0].split("/")[1]) : Number(Number(match[0]).toFixed(5));
     }
     
-    return result;
+    return parseFloat(result.toFixed(5));
   };
   
   this.getUnit = function(input) {
     let result;
     const match = input.match(regexUnit);
+    const parts = input.split(regexUnit);
+    console.log('input:', input);
+    console.log('getUnit parts:', parts);
+    
     // console.log('getUnit');
     console.log(`getUnit: ${match}`);
-    
-    if (numRegex.test(match)) {
-      result = false;
-    } else {
-      result = match[0];
+    try {
+      
+      if (numRegex.test(match)) {
+        result = false;
+      } else {
+        result = match[0];
+        if (result === "l" ) {
+          return "L";
+        }
+        if (result === null || result === false) {
+          throw new Error;
+        }
+      }
+    } catch (e) {
+      throw e;
     }
     // console.log(result);
     
@@ -45,6 +74,9 @@ function ConvertHandler() {
         result = "L";
         break;
       case "l":
+        result = "gal";
+        break;
+      case "L":
         result = "gal";
         break;
       case "kg":
@@ -108,7 +140,10 @@ function ConvertHandler() {
       case "gal":
         result = initNum * galToL;
         break;
-      case ("l" || "L"):
+      case "L":
+        result = initNum / galToL;
+        break;
+      case "l":
         result = initNum / galToL;
         break;
       case "lbs":
